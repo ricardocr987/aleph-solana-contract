@@ -33,8 +33,8 @@ pub mod aleph_solana_contract {
 
 #[derive(Accounts)]
 pub struct Emit<'info> {
-    #[account(signer)]
-    sender: AccountInfo<'info>,
+    #[account(mut)]
+    pub sender: Signer<'info>,
 }
 
 #[event]
