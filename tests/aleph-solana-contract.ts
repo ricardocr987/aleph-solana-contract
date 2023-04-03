@@ -2,16 +2,20 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AlephSolanaContract } from "../target/types/aleph_solana_contract";
 import { createFundedWallet } from "./utils/createFundedWallet";
+import { assert } from "chai";
 
-type MessageEventFields = {
-  timestamp: BigInt,
-  address: anchor.web3.PublicKey,
-  messageType: string,
-  messageContent: string,
-}
 type MessageEvent = {
   name: string,
-  fields: MessageEventFields[];
+  data: {
+    timestamp: BigInt,
+    address: anchor.web3.PublicKey,
+    messageType: string,
+    messageContent: string,
+  }
+}
+
+function isMessageEvent(event: any): event is MessageEvent {
+  return event.data.messageType !== undefined
 }
 
 describe("aleph-solana-contract", () => {
@@ -20,7 +24,7 @@ describe("aleph-solana-contract", () => {
   const program = anchor.workspace.AlephSolanaContract as Program<AlephSolanaContract>;
   const confirmOptions: anchor.web3.ConfirmOptions = { commitment: "confirmed" };
 
-  it("Is initialized!", async () => {
+  it("Test event emit", async () => {
     const sender = await createFundedWallet(provider, 20);
     const tx = await program.methods
       .doMessage("message_type", "message_content")
@@ -40,7 +44,12 @@ describe("aleph-solana-contract", () => {
     const eventParser = new anchor.EventParser(program.programId, new anchor.BorshCoder(program.idl));
     const events = eventParser.parseLogs(rawTx.meta.logMessages);
     for (let event of events) {
-        console.log(event);
+      if (isMessageEvent(event)) {
+        assert.equal(Number(event.data.timestamp), rawTx.blockTime);
+        assert.equal(event.data.address.toString(), sender.publicKey.toString());
+        assert.equal(event.data.messageType, "message_type");
+        assert.equal(event.data.messageContent, "message_content");
+      }
     }
   });
 });
