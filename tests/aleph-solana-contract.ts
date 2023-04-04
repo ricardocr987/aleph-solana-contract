@@ -14,8 +14,21 @@ type MessageEvent = {
   }
 }
 
+type MessageSync = {
+  name: string,
+  data: {
+    timestamp: BigInt,
+    address: anchor.web3.PublicKey,
+    message: string,
+  }
+}
+
 function isMessageEvent(event: any): event is MessageEvent {
   return event.data.messageType !== undefined
+}
+
+function isSyncEvent(event: any): event is MessageSync {
+  return event.data.message !== undefined
 }
 
 describe("aleph-solana-contract", () => {
@@ -24,7 +37,7 @@ describe("aleph-solana-contract", () => {
   const program = anchor.workspace.AlephSolanaContract as Program<AlephSolanaContract>;
   const confirmOptions: anchor.web3.ConfirmOptions = { commitment: "confirmed" };
 
-  it("Test event emit", async () => {
+  it("test do message", async () => {
     const sender = await createFundedWallet(provider, 20);
     const tx = await program.methods
       .doMessage("message_type", "message_content")
@@ -45,10 +58,40 @@ describe("aleph-solana-contract", () => {
     const events = eventParser.parseLogs(rawTx.meta.logMessages);
     for (let event of events) {
       if (isMessageEvent(event)) {
+        console.log(event);
         assert.equal(Number(event.data.timestamp), rawTx.blockTime);
         assert.equal(event.data.address.toString(), sender.publicKey.toString());
         assert.equal(event.data.messageType, "message_type");
         assert.equal(event.data.messageContent, "message_content");
+      }
+    }
+  });
+
+  it("test do emit", async () => {
+    const sender = await createFundedWallet(provider, 20);
+    const tx = await program.methods
+      .doEmit("message_content")
+      .accounts({
+        sender: sender.publicKey,
+      })
+      .signers(
+        sender instanceof (anchor.Wallet as any)
+          ? []
+          : [sender]
+      )
+      .rpc(confirmOptions);
+
+    const rawTx = await provider.connection.getTransaction(tx, {
+      commitment: "confirmed",
+    });
+    const eventParser = new anchor.EventParser(program.programId, new anchor.BorshCoder(program.idl));
+    const events = eventParser.parseLogs(rawTx.meta.logMessages);
+    for (let event of events) {
+      if (isSyncEvent(event)) {
+        console.log(event);
+        assert.equal(Number(event.data.timestamp), rawTx.blockTime);
+        assert.equal(event.data.address.toString(), sender.publicKey.toString());
+        assert.equal(event.data.message, "message_content");
       }
     }
   });
