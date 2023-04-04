@@ -39,8 +39,9 @@ describe("aleph-solana-contract", () => {
 
   it("test do message", async () => {
     const sender = await createFundedWallet(provider, 20);
+    const content = { price: 4, name: "brick", sales: 4, token: "brick" };
     const tx = await program.methods
-      .doMessage("message_type", "message_content")
+      .doMessage("message_type", JSON.stringify(content))
       .accounts({
         sender: sender.publicKey,
       })
@@ -62,15 +63,16 @@ describe("aleph-solana-contract", () => {
         assert.equal(Number(event.data.timestamp), rawTx.blockTime);
         assert.equal(event.data.address.toString(), sender.publicKey.toString());
         assert.equal(event.data.messageType, "message_type");
-        assert.equal(event.data.messageContent, "message_content");
+        assert.equal(event.data.messageContent, JSON.stringify(content));
       }
     }
   });
 
   it("test do emit", async () => {
     const sender = await createFundedWallet(provider, 20);
+    const content = { price: 4, name: "brick", sales: 4, token: "brick" };
     const tx = await program.methods
-      .doEmit("message_content")
+      .doEmit(JSON.stringify(content))
       .accounts({
         sender: sender.publicKey,
       })
@@ -91,7 +93,7 @@ describe("aleph-solana-contract", () => {
         console.log(event);
         assert.equal(Number(event.data.timestamp), rawTx.blockTime);
         assert.equal(event.data.address.toString(), sender.publicKey.toString());
-        assert.equal(event.data.message, "message_content");
+        assert.equal(event.data.message, JSON.stringify(content));
       }
     }
   });
