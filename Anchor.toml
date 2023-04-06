@@ -1,14 +1,14 @@
 [features]
 seeds = false
 skip-lint = false
-[programs.localnet]
-aleph_solana_contract = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+[programs.mainnet]
+aleph_solana_contract = "ALepH1n9jxScbz45aZhBYVa35zxBNbKSvL6rWQpb4snc"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "mainnet"
 wallet = "/Users/riki/.config/solana/id.json"
 
 [scripts]

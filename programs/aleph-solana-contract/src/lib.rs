@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("ALepH1n9jxScbz45aZhBYVa35zxBNbKSvL6rWQpb4snc");
 
 #[program]
 pub mod aleph_solana_contract {
@@ -17,14 +17,14 @@ pub mod aleph_solana_contract {
 
         Ok(())
     }
-    pub fn do_message(ctx: Context<Emit>, msg_type: String, msg_content: String) -> Result<()> {
+    pub fn do_message(ctx: Context<Emit>, msgtype: String, msgcontent: String) -> Result<()> {
         let clock = Clock::get()?;
 
         emit!(MessageEvent {
             timestamp: clock.unix_timestamp,
             address: *ctx.accounts.sender.key,
-            message_type: msg_type.clone(),
-            message_content: msg_content.clone(),
+            msgtype: msgtype.clone(),
+            msgcontent: msgcontent.clone(),
         });
 
         Ok(())
@@ -48,6 +48,6 @@ pub struct SyncEvent {
 pub struct MessageEvent {
     pub timestamp: i64,
     pub address: Pubkey,
-    pub message_type: String,
-    pub message_content: String,
+    pub msgtype: String,
+    pub msgcontent: String,
 }

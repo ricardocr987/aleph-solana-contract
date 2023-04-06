@@ -9,8 +9,8 @@ type MessageEvent = {
   data: {
     timestamp: BigInt,
     address: anchor.web3.PublicKey,
-    messageType: string,
-    messageContent: string,
+    msgtype: string,
+    msgcontent: string,
   }
 }
 
@@ -24,7 +24,7 @@ type MessageSync = {
 }
 
 function isMessageEvent(event: any): event is MessageEvent {
-  return event.data.messageType !== undefined
+  return event.data.msgtype !== undefined
 }
 
 function isSyncEvent(event: any): event is MessageSync {
@@ -57,13 +57,14 @@ describe("aleph-solana-contract", () => {
     });
     const eventParser = new anchor.EventParser(program.programId, new anchor.BorshCoder(program.idl));
     const events = eventParser.parseLogs(rawTx.meta.logMessages);
+
     for (let event of events) {
       if (isMessageEvent(event)) {
         console.log(event);
         assert.equal(Number(event.data.timestamp), rawTx.blockTime);
         assert.equal(event.data.address.toString(), sender.publicKey.toString());
-        assert.equal(event.data.messageType, "message_type");
-        assert.equal(event.data.messageContent, JSON.stringify(content));
+        assert.equal(event.data.msgtype, "message_type");
+        assert.equal(event.data.msgcontent, JSON.stringify(content));
       }
     }
   });
