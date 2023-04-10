@@ -7,7 +7,6 @@ import { assert } from "chai";
 type MessageEvent = {
   name: string,
   data: {
-    timestamp: BigInt,
     address: anchor.web3.PublicKey,
     msgtype: string,
     msgcontent: string,
@@ -17,7 +16,6 @@ type MessageEvent = {
 type MessageSync = {
   name: string,
   data: {
-    timestamp: BigInt,
     address: anchor.web3.PublicKey,
     message: string,
   }
@@ -55,13 +53,13 @@ describe("aleph-solana-contract", () => {
     const rawTx = await provider.connection.getTransaction(tx, {
       commitment: "confirmed",
     });
+    console.log(rawTx)
     const eventParser = new anchor.EventParser(program.programId, new anchor.BorshCoder(program.idl));
     const events = eventParser.parseLogs(rawTx.meta.logMessages);
 
     for (let event of events) {
       if (isMessageEvent(event)) {
         console.log(event);
-        assert.equal(Number(event.data.timestamp), rawTx.blockTime);
         assert.equal(event.data.address.toString(), sender.publicKey.toString());
         assert.equal(event.data.msgtype, "message_type");
         assert.equal(event.data.msgcontent, JSON.stringify(content));
@@ -92,7 +90,6 @@ describe("aleph-solana-contract", () => {
     for (let event of events) {
       if (isSyncEvent(event)) {
         console.log(event);
-        assert.equal(Number(event.data.timestamp), rawTx.blockTime);
         assert.equal(event.data.address.toString(), sender.publicKey.toString());
         assert.equal(event.data.message, JSON.stringify(content));
       }
