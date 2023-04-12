@@ -1,8 +1,12 @@
 [package]
 name = "aleph-solana-contract"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "Aleph Solana program for handling messages"
+authors = ["Ricardo Castello <ricardocr987@gmail.com>"]
 edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ricardocr987/aleph-solana-contract"
+readme = "../../README.md"
 
 [lib]
 crate-type = ["cdylib", "lib"]
